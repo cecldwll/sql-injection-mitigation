@@ -29,5 +29,5 @@
 - test weak mitigation
 - implement strong mitigation function
 - test strong mitigation
-- integrate code into single runnable file
+- integrate code into single runnable file (commit this final file to main)
 - create demo video
