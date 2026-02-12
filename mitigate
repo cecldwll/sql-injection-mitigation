@@ -1,0 +1,110 @@
+
+
+
+import re
+
+
+# WEAK Sanitize
+def weak_sanitize_input(user_input):
+    """
+    Weak mitigation against common SQL injection attacks.
+    Attempts to remove dangerous keywords, comments, and special characters.
+    """
+
+    # Remove common SQL keywords (case-insensitive) for UNION ATTACK and TAUTOLOGY
+    dangerous_keywords = [
+        "UNION", "SELECT", "DROP", "INSERT",
+        "DELETE", "UPDATE", "OR", "AND"
+    ]
+
+    for keyword in dangerous_keywords:
+        pattern = re.compile(keyword, re.IGNORECASE)
+        user_input = pattern.sub("", user_input)
+
+    # Remove all non-alphanumeric characters
+    # For TAUTOLOGY, COMMENT, and ADDITIONAL STATEMENT
+    # We remove symbols such as ' ; - 
+    # This way we can't concat or comment
+    user_input = re.sub(r"[^a-zA-Z0-9]", "", user_input) 
+    return user_input
+
+#  TEST WEAK
+def test_weak_sanitize_input():
+    print("\n")
+    tests = [
+    "admin' OR '1'='1",                         # TAUTOLOGY
+    "admin' --",                                # COMMENT
+    "'; DROP TABLE users; --",                  # ADDITIONAL STATEMENT
+    "admin UNION SELECT password FROM users"    # UNION
+    ]
+
+    for test in tests:
+        print("Original:", test)
+        print("Sanitized:", weak_sanitize_input(test))
+        print("-" * 40)
+    print("\n\n\n")
+
+
+
+
+
+
+# STRONG Sanitize
+def strong_authenticated_query(username, password):
+    """
+    Strong mitigation simulation.
+    Removing SQL from the workflow.
+    """
+    # INPUT from the user will be treated as a string, having removed SQL from the workflow
+    query = "SELECT * FROM users WHERE username = ? AND password = ?;"
+    parameters = (username, password)
+
+    return query, parameters
+
+# TEST STRONG
+def test_strong_query():
+    # Malicious inputs
+    malicious_inputs = [
+        "admin' OR '1'='1",
+        "admin' --",
+        "'; DROP TABLE users; --",
+        "admin UNION SELECT password FROM users"
+    ]
+    print("=== Testing Malicious Inputs ===")
+    for user_input in malicious_inputs:
+        query, params = strong_authenticated_query(user_input, "any_password")
+        print("Input:", user_input)
+        print("Query:", query)
+        print("Parameters:", params)
+        print("-"*40)
+
+    # Valid inputs
+    valid_inputs = [
+        ("alice", "password123"),
+        ("bob_smith", "P@ssw0rd!")
+    ]
+    print("\n=== Testing Valid Inputs ===")
+    for username, password in valid_inputs:
+        query, params = strong_authenticated_query(username, password)
+        print("Username:", username, "Password:", password)
+        print("Query:", query)
+        print("Parameters:", params)
+        print("-"*40)
+
+
+
+
+
+
+# MAIN 
+def main():
+
+    # TEST WEAK 
+    test_weak_sanitize_input()
+    # TEST STRONG 
+    test_strong_query()
+
+
+# RUN CODE
+if __name__ == '__main__':
+    main()
