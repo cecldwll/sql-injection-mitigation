@@ -60,7 +60,8 @@ def Union_Attacks():
         mod = sql_query.replace(";", "")
 
         for attack in attacks:
-            print(mod + attack)
+            new_query = mod + attack
+            print(new_query)
         
         print()
 
@@ -83,7 +84,8 @@ def Add_Statement_Attacks():
         sql_query = generate_auth_query(username, password)
 
         for attack in attacks:
-            print(sql_query + attack)
+            new_query = sql_query + attack
+            print(new_query)
         
         print()
 
@@ -92,8 +94,8 @@ def Add_Statement_Attacks():
 def main():
     print("-------------------_Union Attacks_----------------------------")
     Union_Attacks()
-    print("\n----------------------_Additional Statement Attacks_---------------------------")
-    Add_Statement_Attacks()
+    # print("\n----------------------_Additional Statement Attacks_---------------------------")
+    # Add_Statement_Attacks()
 
     
 
