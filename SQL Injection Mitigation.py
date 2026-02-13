@@ -41,13 +41,29 @@ def run_valid_input_tests():
 #-------------------------------------------------------------------------------
 
 #Write a function to accept two strings (username and a password) and return a single string (SQL) representing the query used to determine if a user is authenticated on a given system.
-def genTautologyQuery(usrname, passwd):
+def genTautologyCommentQuery(usrname, passwd):
     query = (
         "SELECT authenticate\n"
         "FROM passwordList\n"
-        "WHERE name='$" + usrname + "' and passwd='$" + passwd + "'\n\n"
+        "WHERE name='$" + usrname + "' and passwd='$" + passwd + "'"
     )
     return query
+def TautologyAttacks():
+    tautology_attack = [
+        "OR '1'='1'\nFROM passwordList;",
+        "OR 'x'='x'\nFROM passwordList;",
+        "OR 'admin'='admin'",
+        "OR 'x'='x'"
+    ]
+    for user in testValid:
+        username = user["username"]
+        password = user["password"]
+        query = genTautologyCommentQuery(username, password)
+        for attack in tautology_attack:
+            new_query = query + attack
+            print(new_query)
+
+        print()
 def genCommentQuery(usrname, passwd):
     query = (
         "SELECT authenticate\n"
@@ -55,6 +71,24 @@ def genCommentQuery(usrname, passwd):
         "WHERE name='" + usrname + "'; -- and passwd='" + passwd + "';\n\n"
     )
     return query
+def CommentAttacks():
+    comment_attack = [
+        "-- ",
+        "-- username"
+        "'; -- and passwd='"
+        "'; -- and passwd='passwd'"
+    ]
+    for user in testValid:
+        username = user["username"]
+        password = user["password"]
+        query = genCommentQuery(username, password)
+
+        for attack in comment_attack:
+            new_query = query.replace(
+                f"name='{username}'",
+                f"name='{username}' {attack}"
+            )
+            print(new_query)
 
 #Generate a set of cases (one for each member of your team) that represent valid input where the username and the password consist of letters, numbers, and underscores.
 testValid = [
@@ -194,7 +228,7 @@ def weak_sanitize_input(user_input):
 def test_weak_sanitize_input():
     print("\n")
     tests = [
-    "admin' OR '1'='1",                         # TAUTOLOGY
+    "admin' OR '1'='1'",                         # TAUTOLOGY
     "admin' --",                                # COMMENT
     "'; DROP TABLE users; --",                  # ADDITIONAL STATEMENT
     "admin UNION SELECT password FROM users"    # UNION
@@ -284,12 +318,11 @@ Select 1-6 to choose the demostration.
             case 2:
                 print("---------------------Tautology Queries---------------------\n")
                 for test in testValid:
-                    print(genTautologyQuery(test["username"], test["password"]))
+                    TautologyAttacks()
             
             case 3:     
                 print("---------------------Comment Queries---------------------\n")
-                for test in testValid:
-                    print(genCommentQuery(test["username"], test["password"]))
+                CommentAttacks()
 
             case 4:
                 print("-------------------Union Attacks----------------------------")
